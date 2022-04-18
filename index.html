@@ -1,0 +1,182 @@
+<html>
+
+<head>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/p5.min.js"
+        integrity="sha512-N4kV7GkNv7QR7RX9YF/olywyIgIwNvfEe2nZtfyj73HdjCUkAfOBDbcuJ/cTaN04JKRnw1YG1wnUyNKMsNgg3g=="
+        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script defer src="https://unpkg.com/p5.collide2d"></script>
+    <link href="style.css" rel="stylesheet" type="text/css" />
+</head>
+
+<body>
+    <div id="explody"></div>
+    <p id="placeholder"></p>
+    <p id="health"></p>
+    <script>
+        let w = window.innerWidth
+        let h = window.innerHeight
+        //size of window
+        let hitasteroid
+        let hitplanet
+        let hitplayer
+        let player = new gomp()
+        let planet = new earth()
+        let border = new healthborder()
+        let healthbar = new resistance()
+        let canvas
+        let img
+        let score = 0
+        //variable for function
+        function preload() {
+            bg = loadImage('space.jpg')
+            img = loadImage('pixil-frame-0 (1).png')
+            assroids = loadImage('pixil-frame-0 (2).png')
+            Superb = loadImage('suer.png')
+        }
+        function gomp() {
+            this.x = w / 2
+            this.y = h / 2
+            //spawnpoint
+            this.width = 100
+            this.height = 100
+            //size
+            this.speed = 15
+            this.update = function () {
+                if (keyIsDown(87)) {//w
+                    if (this.y <= 0) {
+                        return
+                    }
+                    else {
+                        this.y -= this.speed;
+                    }
+                }
+                if (keyIsDown(65)) {//a
+                    if (this.x <= h / 4 + 11) {
+                        return
+                    }
+                    else {
+                        this.x -= this.speed;
+                    }
+                }
+                if (keyIsDown(68)) {//d
+                    if (this.x >= w - 100) {
+                        return
+                    }
+                    else {
+                        this.x += this.speed;
+                    }
+                }
+                if (keyIsDown(83)) {//s
+                    if (this.y >= h - 100) {
+                        return
+                    }
+                    else {
+                        this.y += this.speed;
+                    }
+                }
+                //movement
+                hitplayer = collideRectCircle(player.x, player.y, player.width, player.height, this.x, this.y, this.radius)
+            }
+            this.show = function () {
+                image(Superb,this.x, this.y, this.width, this.height)
+                //giving existence to a entity
+            }
+        }
+        let hitbox = new asteroids()
+        function asteroids() {
+            this.radius = 100
+            this.damage = 1
+            this.x = w
+            this.y = 0 + this.radius
+            //spawnpoint
+            this.speed = 10
+            //speed
+            this.show = function () {
+                image(assroids, this.x, this.y, this.radius)
+            }
+            this.update = function () {
+                hitasteroid = collideRectCircle(player.x, player.y, player.width, player.height, this.x, this.y, this.radius)
+                hitplanet = collideCircleCircle(this.x, this.y, this.radius, planet.x, planet.y, planet.radius);
+                //seeing if the rectangles hit eachother or not
+                this.x -= this.speed
+                //this is speed
+                if (hitplanet == true) {
+                    this.x = w
+                    this.y = random(h)
+                    this.speed = random(25) + 1
+                    this.damage = floor(random(9) + 1)
+                    planet.health -= this.damage
+                    document.getElementById("health").innerHTML = "Health: "+planet.health
+                }
+                if (hitasteroid == true) {
+                    //when entities hit eachother they turn red
+                    this.x = w
+                    this.y = random(h)
+                    this.speed = random(25) + 1
+                    score += 1
+                    document.getElementById("placeholder").innerHTML = "Score : "+score
+
+                }
+            }
+        }
+        function resistance() {
+            this.width = planet.health * 8
+            this.x = w / 4
+            this.y = 20
+            this.height = 50
+            this.show = function () {
+                this.width = planet.health * 8
+                fill(color("green"))
+                rect(this.x, this.y, this.width, this.height)
+                fill(color("white"))
+            }
+        }
+        function healthborder() {
+            this.width = planet.health * 8
+            this.x = w / 4
+            this.y = 20
+            this.height = 50
+            this.show = function () {
+                fill(color("red"))
+                rect(this.x, this.y, this.width, this.height)
+                fill(color("white"))
+            }
+        }
+        function earth() {
+            this.x = 0 - h / 4
+            this.y = h / 2
+            this.radius = h
+            this.health = 100
+            this.show = function () {
+                circle(this.x, this.y, this.radius)
+            }
+        }
+        function setup() {
+            createCanvas(w, h)
+
+        }
+        function draw() {
+            //draw runs 30 times a second
+            clear()
+            background(bg)
+            player.update()
+            //movement
+            player.show()
+            planet.show()
+            hitbox.show()
+            border.show()
+            healthbar.show()
+            hitbox.update()
+            image(img, -w / 2.5, 0, planet.radius, planet.radius)
+            if (planet.health <= 0) {
+                clear()
+                document.getElementById("explody").style.backgroundImage = "url('explody.gif')"
+                document.getElementById("explody").style.width = w
+                document.getElementById("explody").style.height = h
+                noLoop()
+            }
+        }
+    </script>
+</body>
+
+</html>
